@@ -91,6 +91,7 @@ object WallService {
 fun main() {
     val posts = WallService
 
+    
     posts.add(Post(1, 1, 33333333, "Первая запись"))
     posts.add(Post(1, 1, 33333356, "Вторая запись"))
     posts.add(Post(1, 1, 33339456, "Третья запись"))
