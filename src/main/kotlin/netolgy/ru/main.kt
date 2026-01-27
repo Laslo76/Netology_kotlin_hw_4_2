@@ -21,7 +21,7 @@ data class Post(
     val markedAsAds: Boolean = false,   // Является ли запись рекламой
     val isFavorite: Boolean = false,    // Истина если запись добавлена в закладки у Пользователя
     val postOpenedId: Int = 0,          // Идентификатор отложенной записи
-    val attachments: Array<Attachment?> = arrayOfNulls(1)
+    val attachments: Array<Attachment?> = emptyArray()
 
 ) {
     override fun equals(other: Any?): Boolean {
@@ -147,13 +147,13 @@ object WallService {
 }
 
 interface Attachment {
-    val id: Int
-    val ownerId: Int
     val type: String
 }
 
 
 data class Photo(
+    val id: Int,
+    val ownerId: Int,
     val userId: Int,
     val URL: String,
     val date: Int,
@@ -165,8 +165,6 @@ data class Photo(
 
 
 class PhotoAttachment(
-    override val id: Int,
-    override val ownerId: Int,
     override val type: String,
     val photo: Photo
 ) : Attachment {
@@ -175,8 +173,6 @@ class PhotoAttachment(
 
 
 class AudioAttachment(
-    override val id: Int,
-    override val ownerId: Int,
     override val type: String,
     val audio: Audio
 ) : Attachment {
@@ -185,6 +181,8 @@ class AudioAttachment(
 
 
 data class Audio(
+    val id: Int,
+    val ownerId: Int,
     val URL: String,
     val date: Int,
     val artist: String,
@@ -194,8 +192,6 @@ data class Audio(
 
 
 class AttachmentVideo(
-    override val id: Int,
-    override val ownerId: Int,
     override val type: String,
     val video: Video
 
@@ -204,6 +200,8 @@ class AttachmentVideo(
 
 
 data class Video(
+    val id: Int,
+    val ownerId: Int,
     val description: String,
     val duration: Int,
     val URL: String,
@@ -212,8 +210,6 @@ data class Video(
 
 
 class AttachmentFile(
-    override val id: Int,
-    override val ownerId: Int,
     override val type: String,
     val file: File,
 ) : Attachment {
@@ -221,6 +217,8 @@ class AttachmentFile(
 
 
 data class File(
+    val id: Int,
+    val ownerId: Int,
     val title: String,
     val URL: String,
     val date: Int,
@@ -229,8 +227,6 @@ data class File(
 
 
 class AttachmentHistory(
-    override val id: Int,
-    override val ownerId: Int,
     override val type: String,
     val history: History
 ): Attachment {
@@ -239,6 +235,7 @@ class AttachmentHistory(
 
 data class History(
     val id: Int,
+    val ownerId: Int,
     val typeHistory: String,
     val photo: Photo?,
     val video: Video?
