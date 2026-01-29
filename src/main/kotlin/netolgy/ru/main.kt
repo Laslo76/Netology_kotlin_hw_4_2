@@ -165,18 +165,16 @@ data class Photo(
 
 
 class PhotoAttachment(
-    override val type: String,
     val photo: Photo
 ) : Attachment {
-
+    override val type = "photo"
 }
 
 
 class AudioAttachment(
-    override val type: String,
     val audio: Audio
 ) : Attachment {
-
+    override val type = "audio"
 }
 
 
@@ -192,10 +190,9 @@ data class Audio(
 
 
 class AttachmentVideo(
-    override val type: String,
     val video: Video
-
 ) : Attachment {
+    override val type = "video"
 }
 
 
@@ -210,9 +207,9 @@ data class Video(
 
 
 class AttachmentFile(
-    override val type: String,
     val file: File,
 ) : Attachment {
+    override val type = "file"
 }
 
 
@@ -227,9 +224,9 @@ data class File(
 
 
 class AttachmentHistory(
-    override val type: String,
     val history: History
 ): Attachment {
+    override val type = "history"
 }
 
 
