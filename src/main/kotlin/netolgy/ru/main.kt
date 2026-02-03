@@ -1,17 +1,17 @@
 package netolgy.ru
 
 data class Post(
-    val ownerId: Int,           // Идентификатор владельца стены на которой размещена запись
-    val fromId: Int,            // Идентификатор автора записи
-    val date: Int,              // Время юникстайм
-    val text: String,           // Текст записи
-    val id: Int = 0,                // Идентификатор записи
-    val createdBy: Int = 0,         // Идентификатор администратора опубликовавшего запись (только для сообществ)
-    val replyOwnerId: Int = 0,      // Идентификатор владельца записи в ответ на которую оставлена текущая запись
-    val replyPostId: Int = 0 ,       // Идентификатор записи ответом на которую является текущая запись
+    val ownerId: Int,                   // Идентификатор владельца стены на которой размещена запись
+    val fromId: Int,                    // Идентификатор автора записи
+    val date: Int,                      // Время юникстайм
+    val text: String,                   // Текст записи
+    val id: Int = 0,                    // Идентификатор записи
+    val createdBy: Int = 0,             // Идентификатор администратора опубликовавшего запись (только для сообществ)
+    val replyOwnerId: Int = 0,          // Идентификатор владельца записи в ответ на которую оставлена текущая запись
+    val replyPostId: Int = 0 ,          // Идентификатор записи ответом на которую является текущая запись
     val friendsOnly: Boolean = false,   // Только для друзей
-    val comments: Comment = Comment(),              // Комментарии к записи
-    val likes: Like = Like(),                    // Информация о лайках к записи
+    val commentsCount: Int = 0,
+    val likes: Like = Like(),           // Информация о лайках к записи
     val postType: String = "post",      // Тип записи (post, copy, reply, postpone, suggest)
     val copyHistory: Post? = null,      // Первоисточник записи. Возвращается только если запись является репостом
     val canPin: Boolean = true,         // Может ли текущий пользователь закрепить запись
@@ -46,7 +46,6 @@ data class Post(
         if (isFavorite != other.isFavorite) return false
         if (postOpenedId != other.postOpenedId) return false
         if (text != other.text) return false
-        if (comments != other.comments) return false
         if (likes != other.likes) return false
         if (postType != other.postType) return false
         if (copyHistory != other.copyHistory) return false
@@ -72,7 +71,6 @@ data class Post(
         result = 31 * result + isFavorite.hashCode()
         result = 31 * result + postOpenedId
         result = 31 * result + text.hashCode()
-        result = 31 * result + comments.hashCode()
         result = 31 * result + likes.hashCode()
         result = 31 * result + postType.hashCode()
         result = 31 * result + (copyHistory?.hashCode() ?: 0)
@@ -82,11 +80,10 @@ data class Post(
 }
 
 data class Comment(
-    val count: Int = 0,             // Количество комментариев
-    val canPost: Boolean = true,       // Может ли текущий пользователь комментировать
-    val groupsCanPost: Boolean = false, // Могут ли сообщества комментировать
-    val canClose: Boolean = true,      // Может ли текущий пользователь закрыть комментарии к записи
-    val canOpen: Boolean = true        // Может ли текущий пользователь открыть комментарии к записи
+    val id: Int = 0,
+    val idPost: Int = 0,
+    val date: Int,
+    val text: String
 )
 
 data class Like(
@@ -96,8 +93,12 @@ data class Like(
     val canPublished: Boolean = false  // Может ли текущий пользователь сделать репост
 )
 
+class PostNotFoundException(message: String) : RuntimeException(message)
+
+
 object WallService {
     private var posts = emptyArray<Post>()
+    private var comments = emptyArray<Comment>()
 
     fun clear() {
         posts = emptyArray()
@@ -115,7 +116,7 @@ object WallService {
         return maxId + 1
     }
 
-    fun getById(id: Int): Int {
+    fun getIndexById(id: Int): Int {
         for ((index, post) in posts.withIndex()) {
             if (post.id == id) {
                 return index
@@ -124,8 +125,18 @@ object WallService {
         return -1
     }
 
+    fun getById(id: Int): Post? {
+        for ((index, post) in posts.withIndex()) {
+            if (post.id == id) {
+                return post
+            }
+        }
+        return null
+    }
+
+
     fun changeTextById(id: Int, text: String): Boolean {
-        val indexDesiredPost = getById(id)
+        val indexDesiredPost = getIndexById(id)
         if (indexDesiredPost >= 0) {
             val exchangedPost = posts[indexDesiredPost].copy(text = text)
             posts[indexDesiredPost] = exchangedPost
@@ -144,6 +155,11 @@ object WallService {
         return false
     }
 
+    fun createComment(postId: Int, comment: Comment): Comment {
+        val currentPostId = getById(postId)?.id ?: throw PostNotFoundException("No post with $postId")
+        comments += comment
+        return comment
+    }
 }
 
 interface Attachment {
@@ -250,5 +266,9 @@ fun main() {
 
     val exchangedPost = Post(2, 2, 33339999, "Новая третья запись", id = 3)
     if (!posts.update(exchangedPost)) println("Ошибка изменения записи")
-
+    val newComment = Comment(1, 1, 124551241,"Комментарий к первой записи")
+    try {
+        val comment = posts.createComment(newComment.idPost, newComment)
+        println(comment.text)
+    } catch (e: Exception) {println(e.message)}
 }
